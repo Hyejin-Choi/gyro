@@ -1,10 +1,11 @@
-package com.example.leedonggyu.myapplication;
+package com.example.DoriDori.myapplication;
 
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
@@ -22,7 +23,8 @@ public class MainActivity extends AppCompatActivity {
     /* 단위 시간을 구하기 위한 변수 */
     private double timestamp = 0.0;
     private double dt;
-
+    /*count 함수 5분 고정 (5 * 60 = 300초) */
+    private double count = 0.0;
     /* 회전각을 구하기 위한 변수 */
     private double rad_to_dgr = 180 / Math.PI;
     private static final float NS2S = 1.0f/1000000000.0f;
@@ -30,7 +32,8 @@ public class MainActivity extends AppCompatActivity {
     TextView x;
     TextView y;
     TextView z;
-
+    TextView a;
+    TextView b;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,6 +41,11 @@ public class MainActivity extends AppCompatActivity {
         x = (TextView)findViewById(R.id.x);
         y = (TextView)findViewById(R.id.y);
         z = (TextView)findViewById(R.id.z);
+        a = (TextView)findViewById(R.id.시간);
+        b = (TextView)findViewById(R.id.countup5m);
+    final Vibrator vibrator;
+    vibrator = (Vibrator)getSystemService(VIBRATOR_SERVICE);
+
 
         // 센서 매니저 생성
         mySensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -52,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
                 double gyroZ = sensorEvent.values[2];
 
                 /* 단위시간 계산 */
-                dt = (sensorEvent.timestamp - timestamp)*NS2S;
+                dt = (sensorEvent.timestamp - timestamp)*NS2S; //0.1초
                 timestamp = sensorEvent.timestamp;
 
                 /* 시간이 변화했으면 */
@@ -60,11 +68,24 @@ public class MainActivity extends AppCompatActivity {
                     pitch = pitch + gyroY*dt;
                     roll = roll + gyroX*dt;
                     yaw = yaw + gyroZ*dt;
+                //    count = timestamp*NS2S;
 
-                    x.setText("[roll]"+String.format("%.1f",roll*rad_to_dgr));
+                    x.setText("[roll]:"+String.format("%.1f",roll*rad_to_dgr));
                     y.setText("[Pitch]:"+String.format("%.1f",pitch*rad_to_dgr));
-                    z.setText("[yaw]"+String.format("%.1f",yaw*rad_to_dgr));
+                    z.setText("[yaw]:"+String.format("%.1f",yaw*rad_to_dgr));
+                    a.setText("[단위시간]: "+String.format("%.1f",dt-timestamp*NS2S));
+                   // b.setText("[5분카운트]: "+String.format("%.1f",count));
                 }
+                if((pitch*rad_to_dgr <= -20 || pitch*rad_to_dgr >= 20) || (roll*rad_to_dgr <= -20 || roll*rad_to_dgr >= 20) || (yaw*rad_to_dgr <= -20 || yaw*rad_to_dgr >= 20) ){
+                    vibrator.vibrate(1000);
+                    pitch =0;roll=0;yaw=0;
+                        //countdown 5분이 되었을 때 -> 자이로센서 무시 => lock을 걸 예정(switch)
+
+                }
+
+              //  else
+                  //  vibrator.cancel();
+
 
             }
 

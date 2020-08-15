@@ -1,4 +1,4 @@
-package com.example.leedonggyu.myapplication;
+package com.example.DoriDori.myapplication;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
